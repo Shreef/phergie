@@ -57,14 +57,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     protected $mergeLinks = true;
 
     /**
-     * Flag indicating whether URLs in the output of all plugins should be
-     * shortened before being sent
-     *
-     * @var bool
-     */
-    protected $shortenOuput = false;
-
-    /**
      * Max length of the fetched URL title
      *
      * @var int
@@ -152,10 +144,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
         $plugins->getPlugin('Encoding');
         $plugins->getPlugin('Http');
         $plugins->getPlugin('Tld');
-
-        
-        $this->shortenOutput = $this->getConfig('url.shortenOutput', false);
-        
 
         // make the shortener configurable
         $shortener = $this->getConfig('url.shortener', 'Trim');
@@ -600,11 +588,9 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
 
         $response = $http->head($url, array(), $options);
 
-        if ( $response->getCode() == 405 ) { // [Head] request method not allowed
-
+        if ($response->getCode() == 405) { // [Head] request method not allowed
             $response = $http->get($url, array(), $options);
         }
-
 
         $header = $response->getHeaders('Content-Type');
 
@@ -654,7 +640,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
     {
         $this->renderers[spl_object_hash($obj)] = $obj;
     }
-    
+
     /**
      * Processes events before they are dispatched and tries to shorten any
      * urls in the text
@@ -663,8 +649,7 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
      */
     public function preDispatch()
     {
-
-        if( !$this->shortenOutput ) {
+        if(!$this->getConfig('url.shortenOutput', false)) {
             return;
         }
 
@@ -675,7 +660,6 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                 case Phergie_Event_Request::TYPE_PRIVMSG:
                 case Phergie_Event_Request::TYPE_ACTION:
                 case Phergie_Event_Request::TYPE_NOTICE:
-
                     $text = $event->getArgument(1);
                     $urls = $this->findUrls($text);
 
@@ -696,7 +680,5 @@ class Phergie_Plugin_Url extends Phergie_Plugin_Abstract
                     break;
             }
         }
-
     }
-    
 }
